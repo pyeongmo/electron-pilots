@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pilot Client App</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input, button { margin-bottom: 10px; padding: 8px; }
+        #somethingList { border: 1px solid #ccc; padding: 10px; min-height: 100px; }
+        .something-item { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+<h1>Pilot Client App</h1>
+
+<h2>Add New Something</h2>
+<input type="text" id="somethingName" placeholder="Something Name">
+<input type="value" id="somethingValue" placeholder="Something Value">
+<button id="addSomethingBtn">Add Something</button>
+
+<h2>Something List</h2>
+<div id="somethingList"></div>
+
+<script>
+    const somethingNameInput = document.getElementById('somethingName');
+    const somethingValueInput = document.getElementById('somethingValue');
+    const addSomethingBtn = document.getElementById('addSomethingBtn');
+    const somethingListDiv = document.getElementById('somethingList');
+
+    async function loadSomethings() {
+        try {
+            const somethings = await window.api.getSomethings();
+            somethingListDiv.innerHTML = ''; // Clear existing list
+            if (somethings && somethings.length > 0) {
+                somethings.forEach(something => {
+                    const somethingItem = document.createElement('div');
+                    somethingItem.className = 'something-item';
+                    somethingItem.textContent = `ID: ${something.id}, Name: ${something.name}, Value: ${something.value}`;
+                    somethingListDiv.appendChild(somethingItem);
+                });
+            } else {
+                somethingListDiv.textContent = 'Nothings.';
+            }
+        } catch (error) {
+            somethingListDiv.textContent = 'Failed to load somethings: ' + error.message;
+        }
+    }
+
+    addSomethingBtn.addEventListener('click', async () => {
+        const name = somethingNameInput.value.trim();
+        const value = somethingValueInput.value.trim();
+        if (name && value) {
+            try {
+                const newSomething = await window.api.addSomething(name, value);
+                alert(`Something added: ${newSomething.name}`);
+                somethingNameInput.value = '';
+                somethingValueInput.value = '';
+                loadSomethings(); // Refresh the list
+            } catch (error) {
+                alert('Failed to add something: ' + error.message);
+            }
+        } else {
+            alert('Please enter both name and value.');
+        }
+    });
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', loadSomethings);
+</script>
+</body>
+</html>

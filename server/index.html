@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pilot Server Control</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; text-align: center; background-color: #f4f4f4; }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: inline-block;
+            margin-top: 50px;
+        }
+        h1 { color: #333; }
+        #status-display {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status-running { background-color: #e6ffe6; color: #008000; border: 1px solid #008000; }
+        .status-stopped { background-color: #ffe6e6; color: #cc0000; border: 1px solid #cc0000; }
+        .status-error { background-color: #fffacd; color: #ff8c00; border: 1px solid #ff8c00; }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #start-button { background-color: #4CAF50; color: white; }
+        #start-button:hover { background-color: #45a049; }
+        #stop-button { background-color: #f44336; color: white; }
+        #stop-button:hover { background-color: #da190b; }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Pilot Server Status</h1>
+    <p>This application is running in the background as a server.</p>
+    <div id="status-display">Loading server status...</div>
+
+    <div>
+        <button id="start-button">Start Server</button>
+        <button id="stop-button">Stop Server</button>
+    </div>
+</div>
+
+<script>
+    const statusDisplay = document.getElementById('status-display');
+    const startButton = document.getElementById('start-button');
+    const stopButton = document.getElementById('stop-button');
+
+    // 서버 상태를 UI에 업데이트하는 함수
+    function updateStatusUI(status, port = null, message = '') {
+        statusDisplay.className = ''; // 기존 클래스 제거
+        let text = 'Server Status: ';
+
+        if (status === 'running') {
+            statusDisplay.classList.add('status-running');
+            text += `RUNNING on Port ${port}`;
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        } else if (status === 'stopped') {
+            statusDisplay.classList.add('status-stopped');
+            text += 'STOPPED';
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        } else if (status === 'error') {
+            statusDisplay.classList.add('status-error');
+            text += `ERROR: ${message}`;
+            startButton.disabled = false; // 에러 시 다시 시작할 수 있도록
+            stopButton.disabled = false; // 에러 시 다시 중지 시도할 수 있도록
+        }
+        statusDisplay.textContent = text;
+    }
+
+    // 초기 서버 상태 요청 (메인 프로세스에서 가져옴)
+    window.addEventListener('DOMContentLoaded', async () => {
+        const initialStatus = await window.electronAPI.getServerInitialStatus();
+        updateStatusUI(initialStatus.status, initialStatus.port);
+    });
+
+    // 메인 프로세스에서 서버 상태 변경 알림 수신
+    window.electronAPI.onServerStatusChanged((event, data) => {
+        updateStatusUI(data.status, data.port, data.message);
+    });
+
+    // 버튼 클릭 이벤트 리스너
+    startButton.addEventListener('click', async () => {
+        updateStatusUI('loading', null, 'Starting server...');
+        const result = await window.electronAPI.startServer();
+        // 결과는 onServerStatusChanged에서 처리하므로 여기서 별도 UI 업데이트는 선택 사항
+        // if (result.status === 'error') {
+        //     updateStatusUI('error', null, result.message);
+        // }
+    });
+
+    stopButton.addEventListener('click', async () => {
+        updateStatusUI('loading', null, 'Stopping server...');
+        const result = await window.electronAPI.stopServer();
+        // if (result.status === 'error') {
+        //     updateStatusUI('error', null, result.message);
+        // }
+    });
+</script>
+</body>
+</html>
