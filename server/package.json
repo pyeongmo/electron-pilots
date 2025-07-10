@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "electron": "22.3.27",
-    "electron-builder": "22.14.13"
+    "electron-builder": "23.6.0"
   },
   "build": {
     "appId": "kr.co.neilson.pilot.server",
