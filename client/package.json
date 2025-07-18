@@ -18,13 +18,18 @@
     "appId": "kr.co.neilson.pilot.client",
     "productName": "Pilot Client App",
     "win": {
-      "target": "nsis",
+      "target": {
+        "target": "nsis",
+        "arch": ["x64", "ia32"]
+      },
       "icon": "build/icon.ico"
     },
     "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
   }
 }

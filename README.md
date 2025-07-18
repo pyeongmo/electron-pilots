@@ -11,6 +11,9 @@
 - **Node.js**: v16 고정 (Electron v22 실행 및 빌드를 위한 최고 버전)
 - **npm**: npm 외 패키지 매니저 및 각종 mono-repo 도구 미사용
 - **Electron**: v22 고정 (Windows 7 호환성이 확보된 최고 버전)
+- Electron Builder가 의존하는 `node-gyp`의 [요구사항](https://github.com/nodejs/node-gyp#on-windows)
+  - **Python v3.10**
+  - **VS Desktop development with C++** (from Visual Studio Build Tools 2019)
 
 ## 📦 설치
 

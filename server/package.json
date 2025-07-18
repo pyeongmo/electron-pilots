@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^4.2.0"
   },
   "devDependencies": {
     "electron": "22.3.27",
@@ -26,8 +26,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "perMachine": true,
-      "runAfterFinish": false,
-      "include": "build/installer.nsh"
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "files": [
       "**/*",
@@ -40,6 +40,9 @@
         "to": "node_modules/sqlite3/build/Release/",
         "filter": ["**/*"]
       }
+    ],
+    "asarUnpack": [
+      "**/node_modules/sqlite3/**/*"
     ]
   }
 }

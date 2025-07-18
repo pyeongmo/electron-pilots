@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 
@@ -8,11 +9,17 @@ const serverPort = 3000;
 let expressServer = null; // Express 서버 인스턴스를 저장할 변수
 
 // --- SQLite 데이터베이스 설정 ---
-const dbPath = path.join(__dirname, 'database.sqlite');
+const dbPath = path.join(app.getPath('userData'), 'database.sqlite');
 let db = null; // DB 연결을 null로 초기화
 
 function initializeDatabase() {
     return new Promise((resolve, reject) => {
+        // 데이터베이스 디렉토리가 없으면 생성
+        const dbDir = path.dirname(dbPath);
+        if (!fs.existsSync(dbDir)) {
+            fs.mkdirSync(dbDir, { recursive: true });
+        }
+
         db = new sqlite3.Database(dbPath, (err) => {
             if (err) {
                 console.error('Database connection error:', err.message);
@@ -102,8 +109,14 @@ async function startServer() {
         console.log('Server is already running.');
         return { status: 'running', message: 'Server is already running.' };
     }
+
+    if (!app.isReady()) {
+        await app.whenReady();
+    }
+
+
     try {
-        await initializeDatabase(); // DB 먼저 초기화
+        await initializeDatabase();
         expressServer = serverApp.listen(serverPort, () => {
             console.log(`Pilot server listening on http://localhost:${serverPort}`);
             if (mainWindow) {
